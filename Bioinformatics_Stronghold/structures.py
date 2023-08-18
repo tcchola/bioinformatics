@@ -105,3 +105,50 @@ def codonFrequency(dna_seq, aminoacid):
         frequencyDictionary[sequence] = round(
             frequencyDictionary[sequence] / totalWight, 12)
     return frequencyDictionary
+
+
+def readingFrames(dna_seq):
+    frames = []
+    frames.append(translate(dna_seq, 0))
+    frames.append(translate(dna_seq, 1))
+    frames.append(translate(dna_seq, 2))
+    frames.append(translate(reverseComplement(dna_seq), 0))
+    frames.append(translate(reverseComplement(dna_seq), 1))
+    frames.append(translate(reverseComplement(dna_seq), 2))
+    return frames
+
+
+def proteins(aminoacid_seq):
+    """Calculate posible proteins in aminoacid sequence"""
+    current_protein = []
+    proteins = []
+
+    for aminoacid in aminoacid_seq:
+        if aminoacid == '_':
+            # Stop gathering aminoacids if _ is read from file
+            if current_protein:
+                for protein in current_protein:
+                    proteins.append(protein)
+                current_protein = []
+        else:
+            # Start gathering aminoacids if M is read from file
+            if aminoacid == 'M':
+                current_protein.append("")
+            for i in range(len(current_protein)):
+                current_protein[i] += aminoacid
+    return proteins
+
+
+def all_proteins(sequence, startReadingPosition=0, endReadingPosition=0, ordered=False):
+    if endReadingPosition > startReadingPosition:
+        rfs = readingFrames(sequence[startReadingPosition: endReadingPosition])
+    else:
+        rfs = readingFrames(sequence)
+    res = []
+    for readingframes in rfs:
+        prots = proteins(readingframes)
+        for protein in prots:
+            res.append(protein)
+    if ordered:
+        return sorted(res, key=len, reverse=True)
+    return res
